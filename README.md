@@ -1,0 +1,1 @@
+# UPBGE Sprite Bake
