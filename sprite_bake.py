@@ -5,7 +5,7 @@ import numpy as np
 def run(sheet_name, sheet_size_x, sheet_size_y):
 
     print("SPRITE_BAKE\n")
-    sprite_bake.node_setup()
+    node_setup()
     image = create_sheet(sheet_size_x, sheet_size_y, sheet_name)
 
     image.filepath_raw = bpy.context.scene.render.filepath+sheet_name+".png"
@@ -147,12 +147,10 @@ def create_sprite(sheet_name, tiles_x, tiles_y, frame_dict):
                 vertex_index = new_size.data.loops[loop_index].vertex_index
                 verts.append(vertex_index)
                 
-                if tiles_x > 1 and tiles_y > 1:
-                    
-                    divid = min(tiles_x, tiles_y)
-                    
-                    uv_layer[loop_index].uv[0] = uv_layer[loop_index].uv[0]/divid
-                    uv_layer[loop_index].uv[1] = uv_layer[loop_index].uv[1]/divid
+                if tiles_x > 1:
+                    uv_layer[loop_index].uv[0] = uv_layer[loop_index].uv[0]/tiles_x
+                if tiles_y > 1:
+                    uv_layer[loop_index].uv[1] = uv_layer[loop_index].uv[1]/tiles_y
                 
                 uv_layer[loop_index].uv[0] += x/tiles_x
                 uv_layer[loop_index].uv[1] += (tiles_y-(1+y))/tiles_y
@@ -193,6 +191,8 @@ def create_sprite(sheet_name, tiles_x, tiles_y, frame_dict):
     slot.texture = texture
     slot.use_map_alpha = True
     
+    material.game_settings.use_backface_culling = False
+    material.use_object_color = True
     material.use_transparency = True
     material.use_shadeless = True
     material.alpha = 0.0
@@ -261,12 +261,17 @@ def animate_sprite(obj, tiles_x, tiles_y, anim_id):
             prev_block.keyframe_insert("value",frame=n)
             
         #---
-        fcurves = bpy.data.actions[anim_id+"Action"].fcurves
+        try:
+            new_action = bpy.data.actions[anim_id+"Action"]
+        except:
+            new_action = bpy.data.actions[str(frames)+"_frame_sprite"]
+            
+        fcurves = new_action.fcurves
         for fcurve in fcurves:
             for kf in fcurve.keyframe_points:
                 kf.interpolation = 'CONSTANT'
                 
-        bpy.data.actions[anim_id+"Action"].name = str(frames)+"_frame_sprite"
+        new_action.name = str(frames)+"_frame_sprite"
 
 #---
 def purge_ID(name):
