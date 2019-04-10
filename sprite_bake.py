@@ -147,10 +147,12 @@ def create_sprite(sheet_name, tiles_x, tiles_y, frame_dict):
                 vertex_index = new_size.data.loops[loop_index].vertex_index
                 verts.append(vertex_index)
                 
-                if tiles_x > 1:
-                    uv_layer[loop_index].uv[0] = uv_layer[loop_index].uv[0]/tiles_x
-                if tiles_y > 1:
-                    uv_layer[loop_index].uv[1] = uv_layer[loop_index].uv[1]/tiles_y
+                if tiles_x > 1 or tiles_y > 1:
+                    
+                    if tiles_x > 1 and tiles_y != 1:
+                        uv_layer[loop_index].uv[0] = uv_layer[loop_index].uv[0]/tiles_x
+                    if tiles_y > 1 and tiles_x != 1:
+                        uv_layer[loop_index].uv[1] = uv_layer[loop_index].uv[1]/tiles_y
                 
                 uv_layer[loop_index].uv[0] += x/tiles_x
                 uv_layer[loop_index].uv[1] += (tiles_y-(1+y))/tiles_y
