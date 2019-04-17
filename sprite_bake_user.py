@@ -1,7 +1,6 @@
-import sprite_bake, importlib
+import sprite_bake
 
-sheet_name = "maledef_attack" #unique id for sprite object
-sheet_size = [ 6, 5 ] #[ tiles on x, tiles on y ]
+sheet_name = "sprite_sheet" #unique id for sprite object
+sheet_size = [ 4, 2 ] #[ tiles on x, tiles on y ]
 
-importlib.reload(sprite_bake)
 sprite_bake.run(sheet_name, *sheet_size)
