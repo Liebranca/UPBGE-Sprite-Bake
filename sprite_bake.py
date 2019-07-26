@@ -19,25 +19,27 @@ def node_setup():
     bpy.context.scene.use_nodes = True
     tree = bpy.context.scene.node_tree
     
-    if "Viewer" not in tree.nodes:
-        viewer = tree.nodes.new('CompositorNodeViewer')   
-        viewer.location = 750,210
-        viewer.use_alpha = True
-        
-    if "Render Layers" not in tree.nodes:
-        rlayers = tree.nodes.new('CompositorNodeRLayers') 
-        rlayers.location = 185,285
-        
-    if "Composite" not in tree.nodes:
-        composite = tree.nodes.new("CompositorNodeComposite")
-        composite.location = 750,360
-        
-    viewer = tree.nodes["Viewer"]
-    rlayers = tree.nodes["Render Layers"]
-    composite = tree.nodes["Composite"]
+    if "Viewer" not in tree.nodes or "Render Layers" not in tree.nodes or "Composite" not in tree.nodes:
     
-    tree.links.new(rlayers.outputs[0], viewer.inputs[0])
-    tree.links.new(rlayers.outputs[0], composite.inputs[0])
+        if "Viewer" not in tree.nodes:
+            viewer = tree.nodes.new('CompositorNodeViewer')   
+            viewer.location = 750,210
+            viewer.use_alpha = True
+            
+        if "Render Layers" not in tree.nodes:
+            rlayers = tree.nodes.new('CompositorNodeRLayers') 
+            rlayers.location = 185,285
+            
+        if "Composite" not in tree.nodes:
+            composite = tree.nodes.new("CompositorNodeComposite")
+            composite.location = 750,360
+        
+        viewer = tree.nodes["Viewer"]
+        rlayers = tree.nodes["Render Layers"]
+        composite = tree.nodes["Composite"]
+        
+        tree.links.new(rlayers.outputs[0], viewer.inputs[0])
+        tree.links.new(rlayers.outputs[0], composite.inputs[0])
     
 #----
 def create_sheet(tiles_x, tiles_y, sheet_name="baked_sprite_sheet"):
@@ -142,18 +144,23 @@ def create_sprite(sheet_name, tiles_x, tiles_y, frame_dict):
             verts = []
             
             #---
-            for loop_index in range(poly.loop_start, poly.loop_start + poly.loop_total):
+            for vert_id, loop_index in enumerate( range(poly.loop_start, poly.loop_start + poly.loop_total) ):
                 
                 vertex_index = new_size.data.loops[loop_index].vertex_index
                 verts.append(vertex_index)
                 
-                if tiles_x > 1:
-                    uv_layer[loop_index].uv[0] = uv_layer[loop_index].uv[0]/tiles_x
-                if tiles_y > 1:
-                    uv_layer[loop_index].uv[1] = uv_layer[loop_index].uv[1]/tiles_y
-                
-                uv_layer[loop_index].uv[0] += x/tiles_x
-                uv_layer[loop_index].uv[1] += (tiles_y-(1+y))/tiles_y
+                if vert_id == 3:
+                    uv_layer[loop_index].uv[0] = x*(1/tiles_x) 
+                    uv_layer[loop_index].uv[1] = 1.0 - ( y * (1/tiles_y) )
+                elif vert_id == 2:
+                    uv_layer[loop_index].uv[0] = (x+1)*(1/tiles_x) 
+                    uv_layer[loop_index].uv[1] = 1.0 - ( y * (1/tiles_y) )
+                elif vert_id == 0:
+                    uv_layer[loop_index].uv[0] = x*(1/tiles_x) 
+                    uv_layer[loop_index].uv[1] = 1.0 - ( (y+1) * (1/tiles_y) )
+                elif vert_id == 1:
+                    uv_layer[loop_index].uv[0] = (x+1)*(1/tiles_x) 
+                    uv_layer[loop_index].uv[1] = 1.0 - ( (y+1) * (1/tiles_y) )
             
             group.add(verts, 1.0, 'ADD')
             i += 1
